@@ -3,27 +3,36 @@ import os
 import sys
 import json
 import warnings
-from opwnpyxl.workbook import Workbook
+import openpyxl
 from collections import defaultdict
-from llm import llm_judge
-from norm import norm_en, norm_zh
+
+from libtool.norm import norm_en, norm_zh
 
 warnings.filterwarnings('ignore')
 
 # 配置参数
-score_by_rule = True # 指定打分方法，True为规则打分，False为LLM打分
-lang = "en" # 指定语言 "en" 或 "zh"
+score_by_rule = True  # 指定打分方法，True为规则打分，False为LLM打分
+lang = "en"  # 指定语言 "en" 或 "zh"
+vllm_ocr_result_jsonfile = "ocr_en.json"  # ocr预测结果文件
 
-# ocr预测结果
-vllm_ocr_result_jsonfile = sys.argv[1]
+# llm打分需要加载llm相关文件
+if not score_by_rule:
+    from libtool.llm import llm_judge_ocr
+
+# ocr结果存放格式
+# ["{category}/{imagename1}": "{ocr_result1}",
+# ...,
+# "{category}/{imagenamek}": "{ocr_resultk}"]
+
+# 加载ocr结果
 with open(vllm_ocr_result_jsonfile, "r", encoding="utf-8") as fr:
     preds = json.load(fr)
 
 # 人工标注结果
 if lang == "en":
-    ref_ocr_result_excelfile = "English_menu_ocr_ref.xlsx"
+    ref_ocr_result_excelfile = "data/text/English_menu.xlsx"
 else:
-    ref_ocr_result_excelfile = "Chinese_menu_ocr_ref.xlsx"
+    ref_ocr_result_excelfile = "data/text/Chinese_menu.xlsx"
 workbook = openpyxl.load_workbook(ref_ocr_result_excelfile)
 sheet = workbook.active
 
@@ -42,15 +51,15 @@ for row in sheet.iter_rows(min_row=3):
 
     # 文本归一化
     if lang == "en":
-       dish = norm_en(dish)
-       vllm_ocr_result = norm_en(vllm_ocr_result)
+        dish = norm_en(dish)
+        vllm_ocr_result = norm_en(vllm_ocr_result)
     else:
         dish = norm_zh(dish)
         vllm_ocr_result = norm_zh(vllm_ocr_result)
 
     # LLM打分
     if not score_by_rule:
-        score = llm_judge(dish, vllm_ocr_result)
+        score = llm_judge_ocr(dish, vllm_ocr_result)
     # 规则打分
     else:
         score = 1

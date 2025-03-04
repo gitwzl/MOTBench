@@ -1,7 +1,7 @@
 import transformers
 import torch
 
-eval_prompt = r"""Determine if the following string appears in the given text.
+ocr_prompt = r"""Determine if the following string appears in the given text.
 
 String: [{dish}]
 
@@ -18,20 +18,20 @@ Only return the translation without any additional information.
 Do not generate translations by yourself.
 If no translation is found, return 'null'."""
 
+model_id = "meta-llama/Meta-Llama-3.1-8b-Instruct"
 
-def llm_judge(dish, vllm_ocr_result):
-    model_id = "meta-llama/Meta-Llama-3.1-8b-Instruct"
+pipline = transformers.pipline(
+    "text-generation",
+    model=model_id,
+    model_kwargs={"torch_dtype": torch.bfloat16},
+    device_map="auto"
+)
 
-    pipline = transformers.pipline(
-        "text-generation",
-        model=model_id,
-        model_kwargs={"torch_dtype": torch.bfloat16},
-        device_map="auto"
-    )
 
+def llm_judge_ocr(dish, vllm_ocr_result):
     messages = [
         {"role": "system", "content": "You are a helpful assistant."},
-        {"role": "system", "content": eval_prompt.format(dish=dish, vllm_ocr_result=vllm_ocr_result)}
+        {"role": "system", "content": ocr_prompt.format(dish=dish, vllm_ocr_result=vllm_ocr_result)}
     ]
 
     outputs = pipline(messages, max_new_tokens=256)
@@ -45,14 +45,6 @@ def llm_judge(dish, vllm_ocr_result):
 
 
 def llm_extra_mt(dish, vllm_mt_result, lang):
-    model_id = "meta-llama/Meta-Llama-3.1-8b-Instruct"
-
-    pipline = transformers.pipline(
-        "text-generation",
-        model=model_id,
-        model_kwargs={"torch_dtype": torch.bfloat16},
-        device_map="auto"
-    )
     lang = "English" if lang == "zh" else "Chinese"
     messages = [
         {"role": "system", "content": "You are a helpful assistant."},
