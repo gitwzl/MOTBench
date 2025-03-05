@@ -5,7 +5,7 @@ import json
 import warnings
 import openpyxl
 from collections import defaultdict
-from norm import norm_en, norm_zh, norm_digit, units
+from libtool.norm import norm_en, norm_zh, norm_digit, units
 
 warnings.filterwarnings('ignore')
 

@@ -3,7 +3,7 @@ import os
 import sys
 import json
 import warnings
-import opwnpyxl
+import openpyxl
 from numpy import mean
 from collections import defaultdict
 from libtool.llm import llm_extra_mt
@@ -14,7 +14,7 @@ warnings.filterwarnings('ignore')
 
 # 配置参数
 lang = "en"  # 指定语言 "en" 或 "zh"
-vllm_ocr_result_jsonfile = "mt_en2zh.json"  # mt结果文件
+vllm_mt_result_jsonfile = "mt_en2zh.json"  # mt结果文件
 
 # mt结果存放格式
 # ["{category}/{imagename1}": "{mt_result1}",
