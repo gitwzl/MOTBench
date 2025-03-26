@@ -14,7 +14,7 @@ warnings.filterwarnings('ignore')
 
 # 配置参数
 lang = "en"  # 指定语言 "en" 或 "zh"
-vllm_mt_result_jsonfile = "mt_en2zh.json"  # mt结果文件
+lvlm_mt_result_jsonfile = "mt_en2zh.json"  # mt结果文件
 
 # mt结果存放格式
 # ["{category}/{imagename1}": "{mt_result1}",
@@ -22,7 +22,7 @@ vllm_mt_result_jsonfile = "mt_en2zh.json"  # mt结果文件
 # "{category}/{imagenamek}": "{mt_resultk}"]
 
 # mt结果
-with open(vllm_mt_result_jsonfile, "r", encoding="utf-8") as fr:
+with open(lvlm_mt_result_jsonfile, "r", encoding="utf-8") as fr:
     preds = json.load(fr)
 
 # 人工标注结果
@@ -43,7 +43,7 @@ for row in sheet.iter_rows(min_row=3):
     category = row[1].value  # 类别
     imagename = row[2].value  # 图片名称
 
-    vllm_mt_result = preds[f"{category}/{imagename}"]  # 当前mt结果
+    lvlm_mt_result = preds[f"{category}/{imagename}"]  # 当前mt结果
 
     dish = row[8].value  # 菜品
     ref_dish = row[41].value if lang == "en" else row[26].value  # 参考翻译菜品
@@ -51,16 +51,16 @@ for row in sheet.iter_rows(min_row=3):
     # 文本归一化
     if lang == "en":
         dish = norm_en(dish)
-        vllm_mt_result = norm_en(vllm_mt_result)
+        lvlm_mt_result = norm_en(lvlm_mt_result)
     else:
         dish = norm_zh(dish)
-        vllm_mt_result = norm_zh(vllm_mt_result)
+        lvlm_mt_result = norm_zh(lvlm_mt_result)
 
     # 逐行判断是否匹配
     find_lines = []
-    for vllm_mt_result_line in vllm_mt_result.split("\n"):
-        if dish in vllm_mt_result_line:
-            find_lines.append(vllm_mt_result_line)
+    for lvlm_mt_result_line in lvlm_mt_result.split("\n"):
+        if dish in lvlm_mt_result_line:
+            find_lines.append(lvlm_mt_result_line)
 
     mt = ""
     if len(find_lines) > 0:

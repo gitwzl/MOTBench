@@ -12,7 +12,7 @@ warnings.filterwarnings('ignore')
 # 配置参数
 score_by_rule = True  # 指定打分方法，True为规则打分，False为LLM打分
 lang = "en"  # 指定语言 "en" 或 "zh"
-vllm_ocr_result_jsonfile = "ocr_en.json"  # ocr预测结果文件
+lvlm_ocr_result_jsonfile = "ocr_en.json"  # ocr预测结果文件
 
 # llm打分需要加载llm相关文件
 if not score_by_rule:
@@ -24,7 +24,7 @@ if not score_by_rule:
 # "{category}/{imagenamek}": "{ocr_resultk}"]
 
 # 加载ocr结果
-with open(vllm_ocr_result_jsonfile, "r", encoding="utf-8") as fr:
+with open(lvlm_ocr_result_jsonfile, "r", encoding="utf-8") as fr:
     preds = json.load(fr)
 
 # 人工标注结果
@@ -44,7 +44,7 @@ for row in sheet.iter_rows(min_row=3):
     category = row[1].value  # 类别
     imagename = row[2].value  # 图片名称
 
-    vllm_ocr_result = preds[f"{category}/{imagename}"]  # 当前ocr预测结果
+    lvlm_ocr_result = preds[f"{category}/{imagename}"]  # 当前ocr预测结果
 
     dish = row[9].value  # 菜品
 
@@ -76,25 +76,25 @@ for row in sheet.iter_rows(min_row=3):
     all_items = [norm_digit(item, lang) for item in all_items if item is not None]
     if lang == "en":
         dish = norm_en(dish)
-        vllm_ocr_result = norm_en(vllm_ocr_result)
+        lvlm_ocr_result = norm_en(lvlm_ocr_result)
     else:
         dish = norm_zh(dish)
-        vllm_ocr_result = norm_zh(vllm_ocr_result)
+        lvlm_ocr_result = norm_zh(lvlm_ocr_result)
 
     # 逐行判断是否匹配
     find_lines = []
-    for vllm_ocr_result_line in vllm_ocr_result.split("\n"):
+    for lvlm_ocr_result_line in lvlm_ocr_result.split("\n"):
         # LLM打分
         if not score_by_rule:
-            score = llm_judge_ocr(dish, vllm_ocr_result)
+            score = llm_judge_ocr(dish, lvlm_ocr_result)
         # 规则打分
         else:
             score = 1
-            if dish not in vllm_ocr_result:
+            if dish not in lvlm_ocr_result:
                 score = 0
 
         if score == 1:
-            find_lines.append(vllm_ocr_result_line)
+            find_lines.append(lvlm_ocr_result_line)
 
     score = 0
     if len(find_lines) > 0:
