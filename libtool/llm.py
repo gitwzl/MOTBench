@@ -3,9 +3,9 @@ import torch
 
 ocr_prompt = r"""Determine if the following string appears in the given text.
 
-String: [{dish}]
+String: [{word}]
 
-Text: [{vllm_ocr_result}]
+Text: [{text}]
 
 Requirements:
 
@@ -28,10 +28,10 @@ pipline = transformers.pipline(
 )
 
 
-def llm_judge_ocr(dish, vllm_ocr_result):
+def llm_judge_ocr(dish, lvlm_ocr_result):
     messages = [
         {"role": "system", "content": "You are a helpful assistant."},
-        {"role": "system", "content": ocr_prompt.format(dish=dish, vllm_ocr_result=vllm_ocr_result)}
+        {"role": "system", "content": ocr_prompt.format(word=dish, text=lvlm_ocr_result)}
     ]
 
     outputs = pipline(messages, max_new_tokens=256)
@@ -44,11 +44,11 @@ def llm_judge_ocr(dish, vllm_ocr_result):
         return 0  # 得分0
 
 
-def llm_extra_mt(dish, vllm_mt_result, lang):
+def llm_extra_mt(dish, lvlm_mt_result, lang):
     lang = "English" if lang == "zh" else "Chinese"
     messages = [
         {"role": "system", "content": "You are a helpful assistant."},
-        {"role": "system", "content": mt_prompt.format(word=dish, lang=lang, text=vllm_ocr_result)}
+        {"role": "system", "content": mt_prompt.format(word=dish, lang=lang, text=lvlm_ocr_result)}
     ]
 
     outputs = pipline(messages, max_new_tokens=256)
@@ -58,7 +58,7 @@ def llm_extra_mt(dish, vllm_mt_result, lang):
     if "not found" in res or "null" in res or "no translation" in res:
         return ""
 
-    if res in vllm_mt_result:
+    if res in lvlm_mt_result:
         return res
     else:
         return ""
